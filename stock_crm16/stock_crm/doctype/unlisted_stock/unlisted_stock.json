@@ -10,7 +10,8 @@
   "column_break_1",
   "sector",
   "face_value",
-  "is_active"
+  "is_active",
+  "amended_from"
  ],
  "fields": [
   {
@@ -49,11 +50,19 @@
    "fieldname": "is_active",
    "fieldtype": "Check",
    "label": "Is Active Stock"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "options": "Unlisted Stock",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-08-18 23:30:00.000000",
  "modified_by": "Administrator",
  "module": "Stock CRM",
  "name": "Unlisted Stock",
@@ -61,6 +70,8 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -70,19 +81,24 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "export": 1,
    "read": 1,
    "report": 1,
    "role": "Stock Admin",
+   "submit": 1,
    "write": 1
   },
   {
    "read": 1,
-   "role": "Stock Team Lead"
+   "role": "Stock Team Lead",
+   "submit": 1
   },
   {
    "read": 1,

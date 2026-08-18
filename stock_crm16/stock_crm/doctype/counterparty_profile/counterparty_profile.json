@@ -14,7 +14,8 @@
   "dp_id",
   "client_id",
   "section_break_bank",
-  "bank_accounts"
+  "bank_accounts",
+  "amended_from"
  ],
  "fields": [
   {
@@ -76,11 +77,19 @@
    "fieldtype": "Table",
    "label": "Bank Accounts",
    "options": "Counterparty Bank Account"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "options": "Counterparty Profile",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-08-12 12:00:00.000000",
+ "modified": "2026-08-18 23:45:00.000000",
  "modified_by": "Administrator",
  "module": "Stock CRM",
  "name": "Counterparty Profile",
@@ -88,6 +97,8 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -97,20 +108,25 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "export": 1,
    "read": 1,
    "report": 1,
    "role": "Stock Admin",
+   "submit": 1,
    "write": 1
   },
   {
    "create": 1,
    "read": 1,
    "role": "Stock Team Lead",
+   "submit": 1,
    "write": 1
   },
   {
