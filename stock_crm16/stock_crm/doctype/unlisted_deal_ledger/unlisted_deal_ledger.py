@@ -3,8 +3,13 @@ from frappe.model.document import Document
 
 class UnlistedDealLedger(Document):
 	def validate(self):
+		self.fetch_isin_if_missing()
 		self.calculate_totals()
 		self.validate_roles()
+
+	def fetch_isin_if_missing(self):
+		if self.stock and not self.isin_number:
+			self.isin_number = frappe.db.get_value("Unlisted Stock", self.stock, "isin_number")
 
 	def calculate_totals(self):
 		qty = float(self.quantity or 0)
@@ -22,8 +27,11 @@ class UnlistedDealLedger(Document):
 
 		# 4. TCS Value 0.10% (Sec 206C(1H))
 		if self.tcs_applicable == "YES":
-			t_rate = float(self.tcs_rate or 0.10) / 100.0
-			self.tcs_value = round(self.buyer_gross_value * t_rate, 2)
+			t_rate_val = float(self.tcs_rate or 0.100)
+			# Handle both decimal (0.001) and percentage (0.10) formats
+			if t_rate_val > 0.01:
+				t_rate_val = t_rate_val / 100.0
+			self.tcs_value = round(self.buyer_gross_value * t_rate_val, 2)
 		else:
 			self.tcs_value = 0.00
 
@@ -37,11 +45,13 @@ class UnlistedDealLedger(Document):
 		self.net_arbitrage = round(gross_spread - brokerage - expenses, 2)
 
 	def validate_roles(self):
-		# Prevent agents from submitting directly if they only have Stock Agent role
+		# Allow System Manager, Administrator, Stock Admin, and Stock Team Lead to submit
 		if self.docstatus == 1 and frappe.session.user != "Administrator":
 			roles = frappe.get_roles(frappe.session.user)
-			if "Stock Agent" in roles and "Stock Team Lead" not in roles and "Stock Admin" not in roles:
-				frappe.throw("Stock Agents cannot submit deals. Please request a Team Lead review.")
+			if "System Manager" not in roles and "Stock Admin" not in roles and "Stock Team Lead" not in roles:
+				if "Stock Agent" in roles:
+					frappe.throw("Stock Agents cannot submit deals directly. Please request a Team Lead review.")
 
 def on_submit_deal(doc, method):
 	frappe.msgprint(f"Deal {doc.name} successfully submitted and locked by {frappe.session.user}.")
+

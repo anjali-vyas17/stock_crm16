@@ -1,5 +1,13 @@
+// Copyright (c) 2026, Anjali and contributors
+// For license information, please see license.txt
+
 frappe.ui.form.on('Unlisted Deal Ledger', {
 	refresh: function(frm) {
+		// Always add prominent Executive MIS Report button near navigation toolbar
+		frm.add_custom_button(__('📊 Executive MIS Report'), function() {
+			frappe.set_route('query-report', 'Executive MIS & CA Audit Dashboard');
+		}).addClass('btn-primary');
+
 		if (frm.doc.docstatus === 1) {
 			// Add 1-Click PDF Deal Confirmation Note button
 			frm.add_custom_button(__('📄 Generate Deal Note PDF'), function() {
@@ -7,7 +15,7 @@ frappe.ui.form.on('Unlisted Deal Ledger', {
 					`/api/method/frappe.utils.print_format.download_pdf?doctype=Unlisted%20Deal%20Ledger&name=${frm.doc.name}&format=Deal%20Confirmation%20Note`
 				);
 				window.open(url, '_blank');
-			}).addClass('btn-primary');
+			}).addClass('btn-success');
 
 			// Add 1-Click Sales Invoice button
 			frm.add_custom_button(__('🧾 Create Sales Invoice'), function() {
@@ -19,8 +27,16 @@ frappe.ui.form.on('Unlisted Deal Ledger', {
 				});
 			});
 		}
+	},
 
-		frm.trigger('calculate_totals');
+	on_submit: function(frm) {
+		frappe.show_alert({
+			message: __('Deal submitted successfully! Redirecting to Executive MIS & CA Audit Dashboard...'),
+			indicator: 'green'
+		});
+		setTimeout(function() {
+			frappe.set_route('query-report', 'Executive MIS & CA Audit Dashboard');
+		}, 600);
 	},
 
 	quantity: function(frm) { frm.trigger('calculate_totals'); },
@@ -32,39 +48,56 @@ frappe.ui.form.on('Unlisted Deal Ledger', {
 	direct_expenses: function(frm) { frm.trigger('calculate_totals'); },
 
 	calculate_totals: function(frm) {
+		if (frm.doc.docstatus === 1) return;
+
 		const qty = flt(frm.doc.quantity || 0);
 		const s_rate = flt(frm.doc.seller_rate || 0);
 		const b_rate = flt(frm.doc.buyer_rate || 0);
 
 		// 1. Seller Gross Cost
 		const seller_gross = flt((qty * s_rate).toFixed(2));
-		frm.set_value('seller_gross_cost', seller_gross);
+		if (flt(frm.doc.seller_gross_cost) !== seller_gross) {
+			frm.set_value('seller_gross_cost', seller_gross);
+		}
 
 		// 2. Buyer Gross Value
 		const buyer_gross = flt((qty * b_rate).toFixed(2));
-		frm.set_value('buyer_gross_value', buyer_gross);
+		if (flt(frm.doc.buyer_gross_value) !== buyer_gross) {
+			frm.set_value('buyer_gross_value', buyer_gross);
+		}
 
 		// 3. Stamp Duty 0.015% (Sec 9A)
 		const stamp_duty = flt((buyer_gross * 0.00015).toFixed(2));
-		frm.set_value('stamp_duty', stamp_duty);
+		if (flt(frm.doc.stamp_duty) !== stamp_duty) {
+			frm.set_value('stamp_duty', stamp_duty);
+		}
 
 		// 4. TCS Value 0.10% (Sec 206C(1H))
 		let tcs_val = 0.00;
 		if (frm.doc.tcs_applicable === 'YES') {
-			const t_rate = flt(frm.doc.tcs_rate || 0.10) / 100.0;
+			let t_rate = flt(frm.doc.tcs_rate || 0.10);
+			if (t_rate > 0.01) {
+				t_rate = t_rate / 100.0;
+			}
 			tcs_val = flt((buyer_gross * t_rate).toFixed(2));
 		}
-		frm.set_value('tcs_value', tcs_val);
+		if (flt(frm.doc.tcs_value) !== tcs_val) {
+			frm.set_value('tcs_value', tcs_val);
+		}
 
 		// 5. Total Net Due From Buyer
 		const total_due = flt((buyer_gross + stamp_duty + tcs_val).toFixed(2));
-		frm.set_value('total_net_due', total_due);
+		if (flt(frm.doc.total_net_due) !== total_due) {
+			frm.set_value('total_net_due', total_due);
+		}
 
 		// 6. Net Deal Arbitrage Profit
 		const brokerage = flt(frm.doc.brokerage_split || 0);
 		const expenses = flt(frm.doc.direct_expenses || 0);
 		const gross_spread = buyer_gross - seller_gross;
 		const net_arb = flt((gross_spread - brokerage - expenses).toFixed(2));
-		frm.set_value('net_arbitrage', net_arb);
+		if (flt(frm.doc.net_arbitrage) !== net_arb) {
+			frm.set_value('net_arbitrage', net_arb);
+		}
 	}
 });

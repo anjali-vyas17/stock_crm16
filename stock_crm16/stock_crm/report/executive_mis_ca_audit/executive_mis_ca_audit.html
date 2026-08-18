@@ -1,0 +1,168 @@
+<style>
+	.mis-dashboard {
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+		color: #212529;
+		margin: 15px 0;
+	}
+	.block-title {
+		background-color: #1e4620;
+		color: #ffffff;
+		font-weight: 700;
+		font-size: 14px;
+		padding: 10px 15px;
+		margin-top: 20px;
+		margin-bottom: 0px;
+		border-top-left-radius: 4px;
+		border-top-right-radius: 4px;
+		letter-spacing: 0.5px;
+	}
+	.mis-table {
+		width: 100%;
+		border-collapse: collapse;
+		margin-bottom: 25px;
+		font-size: 13px;
+		box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+	}
+	.mis-table th {
+		background-color: #2d5a27;
+		color: #ffffff;
+		text-align: left;
+		padding: 10px 12px;
+		font-weight: 600;
+		border: 1px solid #1e4620;
+	}
+	.mis-table td {
+		padding: 9px 12px;
+		border: 1px solid #e0e0e0;
+	}
+	.mis-table tr:nth-child(even) {
+		background-color: #f4faf3;
+	}
+	.mis-table tr:hover {
+		background-color: #eaf5e8;
+	}
+	.value-col {
+		font-weight: 600;
+		text-align: right;
+	}
+	.quarter-total-row {
+		background-color: #fdf6e2 !important;
+		font-weight: 700;
+		border-top: 2px solid #d4af37;
+	}
+</style>
+
+<div class="mis-dashboard">
+	<!-- BLOCK A -->
+	<div class="block-title">BLOCK A ▶ Real-Time Business Performance Metrics</div>
+	<table class="mis-table">
+		<thead>
+			<tr>
+				<th>METRIC</th>
+				<th style="text-align: right;">LIVE VALUE (₹)</th>
+				<th>NOTES / REFERENCE</th>
+			</tr>
+		</thead>
+		<tbody>
+			{%
+				var total_volume = 0;
+				var gross_spread = 0;
+				var brokerage_splits = 0;
+				var direct_expenses = 0;
+				var net_arbitrage = 0;
+				var stamp_duty = 0;
+				var tcs_value = 0;
+
+				for (var i = 0; i < data.length; i++) {
+					var row = data[i];
+					total_volume += flt(row.buyer_gross_value);
+					gross_spread += (flt(row.buyer_gross_value) - flt(row.seller_gross_cost));
+					brokerage_splits += flt(row.brokerage_split);
+					direct_expenses += flt(row.direct_expenses);
+					net_arbitrage += flt(row.net_arbitrage);
+					stamp_duty += flt(row.stamp_duty);
+					tcs_value += flt(row.tcs_value);
+				}
+			%}
+			<tr>
+				<td><strong>Total Gross Transaction Volume</strong></td>
+				<td class="value-col">{{ format_currency(total_volume, "INR") }}</td>
+				<td>Sum of all Buyer Gross Values</td>
+			</tr>
+			<tr>
+				<td><strong>Gross Transaction Spreads (Buy–Sell)</strong></td>
+				<td class="value-col">{{ format_currency(gross_spread, "INR") }}</td>
+				<td>Aggregate buy sell rate differential</td>
+			</tr>
+			<tr>
+				<td><strong>Cumulative Brokerage Splits Paid</strong></td>
+				<td class="value-col">{{ format_currency(brokerage_splits, "INR") }}</td>
+				<td>External broker cuts</td>
+			</tr>
+			<tr>
+				<td><strong>Total Direct Deal Expenses</strong></td>
+				<td class="value-col">{{ format_currency(direct_expenses, "INR") }}</td>
+				<td>Misc deal costs</td>
+			</tr>
+			<tr>
+				<td><strong>Net Realized Deal Arbitrage</strong></td>
+				<td class="value-col" style="color: #10b981;">{{ format_currency(net_arbitrage, "INR") }}</td>
+				<td>Net profit after all costs</td>
+			</tr>
+			<tr>
+				<td><strong>Total Stamp Duty Accrued [Sec 9A]</strong></td>
+				<td class="value-col">{{ format_currency(stamp_duty, "INR") }}</td>
+				<td>For statutory remittance</td>
+			</tr>
+			<tr>
+				<td><strong>Total TCS Collected [Sec 206C(1H)]</strong></td>
+				<td class="value-col">{{ format_currency(tcs_value, "INR") }}</td>
+				<td>For 27EQ quarterly return</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<!-- BLOCK B -->
+	<div class="block-title">BLOCK B ▶ CA Quarterly Audit — Stamp Duty & TCS [Sec 206C(1H)] Summary</div>
+	<table class="mis-table">
+		<thead>
+			<tr>
+				<th>QUARTER / PERIOD</th>
+				<th>DATE FROM</th>
+				<th>DATE TO</th>
+				<th style="text-align: right;">STAMP DUTY (₹)</th>
+				<th style="text-align: right;">TCS (₹)</th>
+				<th style="text-align: right;">AGGREGATE TAX (₹)</th>
+			</tr>
+		</thead>
+		<tbody>
+			{%
+				var current_year = 2026;
+				var quarters = [
+					{ name: 'Q1 Apr–Jun ' + current_year, from: '01/04/' + current_year, to: '30/06/' + current_year },
+					{ name: 'Q2 Jul–Sep ' + current_year, from: '01/07/' + current_year, to: '30/09/' + current_year },
+					{ name: 'Q3 Oct–Dec ' + current_year, from: '01/10/' + current_year, to: '31/12/' + current_year },
+					{ name: 'Q4 Jan–Mar ' + (current_year + 1), from: '01/01/' + (current_year + 1), to: '31/03/' + (current_year + 1) }
+				];
+			%}
+			{% for (var q = 0; q < quarters.length; q++) { %}
+			<tr>
+				<td><strong>{{ quarters[q].name }}</strong></td>
+				<td>{{ quarters[q].from }}</td>
+				<td>{{ quarters[q].to }}</td>
+				<td class="value-col">{{ format_currency(q === 0 ? stamp_duty : 0, "INR") }}</td>
+				<td class="value-col">{{ format_currency(q === 0 ? tcs_value : 0, "INR") }}</td>
+				<td class="value-col">{{ format_currency(q === 0 ? (stamp_duty + tcs_value) : 0, "INR") }}</td>
+			</tr>
+			{% } %}
+			<tr class="quarter-total-row">
+				<td><strong>FULL YEAR {{ current_year }}-{{ (current_year + 1).toString().substr(-2) }}</strong></td>
+				<td>01/04/{{ current_year }}</td>
+				<td>31/03/{{ current_year + 1 }}</td>
+				<td class="value-col">{{ format_currency(stamp_duty, "INR") }}</td>
+				<td class="value-col">{{ format_currency(tcs_value, "INR") }}</td>
+				<td class="value-col">{{ format_currency(stamp_duty + tcs_value, "INR") }}</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
