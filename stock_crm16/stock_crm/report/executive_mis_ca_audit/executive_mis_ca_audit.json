@@ -10,10 +10,10 @@
  "modified": "2026-08-12 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock CRM",
- "name": "Executive MIS & CA Audit Dashboard",
+ "name": "Executive MIS & CA Audit",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Unlisted Deal Ledger",
- "report_name": "Executive MIS & CA Audit Dashboard",
+ "report_name": "Executive MIS & CA Audit",
  "report_type": "Script Report"
 }

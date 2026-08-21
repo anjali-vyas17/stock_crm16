@@ -5,7 +5,7 @@ frappe.ui.form.on('Unlisted Deal Ledger', {
 	refresh: function(frm) {
 		// Always add prominent Executive MIS Report button near navigation toolbar
 		frm.add_custom_button(__('📊 Executive MIS Report'), function() {
-			frappe.set_route('query-report', 'Executive MIS & CA Audit Dashboard');
+			frappe.set_route('query-report', 'Executive MIS & CA Audit');
 		}).addClass('btn-primary');
 
 		if (frm.doc.docstatus === 1) {
@@ -31,11 +31,11 @@ frappe.ui.form.on('Unlisted Deal Ledger', {
 
 	on_submit: function(frm) {
 		frappe.show_alert({
-			message: __('Deal submitted successfully! Redirecting to Executive MIS & CA Audit Dashboard...'),
+			message: __('Deal submitted successfully! Redirecting to Executive MIS & CA Audit...'),
 			indicator: 'green'
 		});
 		setTimeout(function() {
-			frappe.set_route('query-report', 'Executive MIS & CA Audit Dashboard');
+			frappe.set_route('query-report', 'Executive MIS & CA Audit');
 		}, 600);
 	},
 
